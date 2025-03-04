@@ -16,10 +16,10 @@ export default function TabNagivation() {
    >
     <Tab.Screen name='home' component={HomeScreen}
     options={{
-        tabBarLabel:'Search',
+        tabBarLabel:'Home',
         tabBarActiveTintColor:Colors.PRIMARY,
         tabBarIcon:({color,size})=>(
-            <Ionicons name="search" size={size} color={color} />
+            <Ionicons name="home" size={size} color={color} />
         )
     }}/>
     <Tab.Screen name='favourite' component={FavouriteScreen}

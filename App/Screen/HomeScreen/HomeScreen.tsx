@@ -1,10 +1,12 @@
-import { View, Text } from 'react-native'
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native'
+import MapComponent from './MapComponent'
 import React from 'react'
+import UtilBar from './UtilBar'
 
 export default function HomeScreen() {
   return (
-    <View>
-      <Text>HomeScreen</Text>
+    <View style={{flex: 1}}>
+      <MapComponent/>
     </View>
   )
 }
