@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SearchList from "./SearchList";
+import Colors from "../../Utils/Colors";
 
 interface ChargingStation {
   distance: number;
@@ -13,21 +14,14 @@ interface ChargingStation {
 
 interface UtilBarProps {
   focusOnUserLocation: () => void;
-  onSearch: (query: string) => void;
-  filteredStations: ChargingStation[];
   onSelectStation: (station: ChargingStation) => void;
 }
 
 const UtilBar: React.FC<UtilBarProps> = ({
   focusOnUserLocation,
-  onSearch,
-  filteredStations,
   onSelectStation,
 }) => {
   const [isSearching, setIsSearching] = useState(false);
-
-  const handleFocus = () => setIsSearching(true);
-  const handleBlur = () => setIsSearching(false);
 
   return (
     <View style={styles.container}>
@@ -35,11 +29,8 @@ const UtilBar: React.FC<UtilBarProps> = ({
         {/* Search Component */}
         <View style={styles.searchBarWrapper}>
           <SearchList
-            onSearch={onSearch}
-            filteredStations={filteredStations}
             onSelectStation={onSelectStation}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
+            setIsSearching={setIsSearching}
             isSearching={isSearching}
           />
         </View>
@@ -50,7 +41,7 @@ const UtilBar: React.FC<UtilBarProps> = ({
             style={styles.focusButton}
             onPress={focusOnUserLocation}
           >
-            <Ionicons name="locate-sharp" size={20}></Ionicons>
+            <Ionicons name="locate-sharp" size={27} color={Colors.PRIMARY}></Ionicons>
           </TouchableOpacity>
         )}
       </View>
@@ -61,7 +52,7 @@ const UtilBar: React.FC<UtilBarProps> = ({
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    top: 50,
+    top: 71,
     left: 10,
     right: 10,
     zIndex: 2,
@@ -75,9 +66,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   focusButton: {
-    backgroundColor: "white",
-    paddingVertical: 18,
-    paddingHorizontal: 17,
+    backgroundColor: Colors.WHITE,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
     borderRadius: 10,
     shadowColor: "#000",
     shadowOpacity: 0.2,

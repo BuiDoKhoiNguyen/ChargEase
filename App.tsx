@@ -7,7 +7,9 @@ import TabNagivation from './App/Navigations/TabNavigation';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { tokenCache } from './App/Utils/Cache';
+import {Provider} from "react-redux";
 import LoginScreen from './App/Screen/LoginScreen/LoginScreen';
+import store from './App/Utils/Redux/Store';
 
 export default function App() {
   const publishableKey = 'pk_test_cHVtcGVkLXR1bmEtMi5jbGVyay5hY2NvdW50cy5kZXYk'
@@ -33,6 +35,7 @@ export default function App() {
   }
 
   return (
+    <Provider store={store}>
     <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey} >
       <View style={styles.container} onLayout={onLayoutRootView}>
         <SignedIn>
@@ -46,6 +49,7 @@ export default function App() {
         <StatusBar style="auto" />
       </View>
     </ClerkProvider>
+    </Provider>
   );
 }
 

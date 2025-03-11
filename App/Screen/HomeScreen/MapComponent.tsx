@@ -9,13 +9,17 @@ import {
   TouchableOpacity,
   Linking,
 } from "react-native";
-import MapView, { Marker, Region } from "react-native-maps";
-import MapViewDirections from "react-native-maps-directions";
+import MapView, { Marker, Region, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
+import axios from "axios";
 import chargingStations from "../../Utils/dummyData";
 import UtilBar from "./UtilBar";
 import colors from "../../Utils/Colors";
-import ActionSheet, { SheetManager } from "react-native-actions-sheet";
+import { SheetManager } from "react-native-actions-sheet";
+import Colors from "../../Utils/Colors";
+import InformationSheet from "./InformationSheet";
+import { useRoute } from "@react-navigation/native";
+import { HomeScreenProps } from "../../Navigations/types";
 
 interface ChargingStation {
   distance: number;
@@ -25,18 +29,30 @@ interface ChargingStation {
   title: string;
 }
 
-const GOOGLE_MAPS_APIKEY = "YOUR_GOOGLE_MAPS_API_KEY";
+const OPENROUTESERVICE_API_KEY =
+  "5b3ce3597851110001cf6248ac34d8a92f584c05939953f73989bb8a";
 
 const MapComponent: React.FC = () => {
   const [userLocation, setUserLocation] = useState<Region | null>(null);
-  const [filteredStations, setFilteredStations] = useState<ChargingStation[]>(
-    []
-  );
-  const [searchResults, setSearchResults] = useState<ChargingStation[]>([]);
   const [selectedStation, setSelectedStation] =
     useState<ChargingStation | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const mapRef = useRef<MapView | null>(null);
+  const [routeCoords, setRouteCoords] = useState<
+    { latitude: number; longitude: number }[]
+  >([]);
+  const [isTraveling, setIsTraveling] = useState(false);
+
+  const route = useRoute<HomeScreenProps['route']>();
+  const favouriteSelectedStation = route.params?.selectedStation;
+  
+  useEffect(() => {
+    console.log("using effect")
+    if (favouriteSelectedStation) {
+      console.log(favouriteSelectedStation)
+      fetchDirections(favouriteSelectedStation)
+    }
+  }, [favouriteSelectedStation]);
 
   useEffect(() => {
     let isMounted = true; // Prevents state updates on unmounted components
@@ -87,9 +103,7 @@ const MapComponent: React.FC = () => {
   }, []);
 
   setInterval(async () => {
-    const location = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.High,
-    });
+    const location = await Location.getCurrentPositionAsync();
 
     setUserLocation((prevLocation) => {
       if (
@@ -107,39 +121,7 @@ const MapComponent: React.FC = () => {
       return prevLocation;
     });
 
-    const updatedStations = chargingStations.map((station) => ({
-      ...station,
-      distance: haversineDistance(
-        location.coords.latitude,
-        location.coords.longitude,
-        station.latitude,
-        station.longitude
-      ),
-    }));
-
-    updatedStations.sort((a, b) => a.distance - b.distance);
-    setFilteredStations(updatedStations);
   }, 15000);
-
-  const haversineDistance = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ) => {
-    const r = 6371; // Radius of the Earth in km
-    const p = Math.PI / 180;
-
-    const a =
-      0.5 -
-      Math.cos((lat2 - lat1) * p) / 2 +
-      (Math.cos(lat1 * p) *
-        Math.cos(lat2 * p) *
-        (1 - Math.cos((lon2 - lon1) * p))) /
-        2;
-
-    return 2 * r * Math.asin(Math.sqrt(a));
-  };
 
   const focusOnUserLocation = () => {
     if (userLocation && mapRef.current) {
@@ -147,23 +129,31 @@ const MapComponent: React.FC = () => {
     }
   };
 
-  const handleSearch = (query: string) => {
-    if (query.trim() === "") {
-      setSearchResults(filteredStations);
+  const fetchDirections = async (destination: ChargingStation) => {
+    if (!userLocation) return;
+
+    const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${OPENROUTESERVICE_API_KEY}&start=${userLocation.longitude},${userLocation.latitude}&end=${destination.longitude},${destination.latitude}`;
+
+    try {
+      const response = await axios.get(url);
+      const coords = response.data.features[0].geometry.coordinates.map(
+        ([longitude, latitude]: [number, number]) => ({ latitude, longitude })
+      );
+      setRouteCoords(coords);
+
+      mapRef.current?.fitToCoordinates(coords, {
+        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+        animated: true,
+      });
+      SheetManager.hide("stationDetails");
+      setIsTraveling(true);
+    } catch (error) {
+      console.error("Error fetching directions:", error);
     }
-
-    const results = filteredStations
-      .filter((station) =>
-        station.title.toLowerCase().includes(query.toLowerCase())
-      )
-      .sort((a, b) => a.distance - b.distance);
-
-    setSearchResults(results);
   };
 
   const handleStationSelect = (station: ChargingStation) => {
     Keyboard.dismiss();
-    setFilteredStations([]);
     setSelectedStation(station);
     mapRef.current?.animateToRegion(
       {
@@ -216,65 +206,35 @@ const MapComponent: React.FC = () => {
                 onPress={() => handleStationSelect(station)}
               />
             ))}
-
-            {selectedStation && userLocation && (
-              <MapViewDirections
-                origin={{
-                  latitude: userLocation.latitude,
-                  longitude: userLocation.longitude,
-                }}
-                destination={{
-                  latitude: selectedStation.latitude,
-                  longitude: selectedStation.longitude,
-                }}
-                apikey={GOOGLE_MAPS_APIKEY}
-                strokeWidth={5}
-                strokeColor={colors.PRIMARY}
-                mode="DRIVING"
+            {routeCoords.length > 0 && (
+              <Polyline
+                coordinates={routeCoords}
+                strokeWidth={10}
+                strokeColor= {Colors.PRIMARY}
               />
             )}
           </MapView>
           <UtilBar
             focusOnUserLocation={focusOnUserLocation}
-            onSearch={handleSearch}
-            filteredStations={searchResults}
             onSelectStation={handleStationSelect}
           />
+          <InformationSheet
+            selectedStation={selectedStation}
+            fetchDirections={fetchDirections}
+          />
 
-          {/* Action Sheet for Station Details */}
-          <ActionSheet id="stationDetails">
-            {selectedStation && (
-              <View style={styles.actionSheetContent}>
-                <Text style={styles.stationTitle}>{selectedStation.title}</Text>
-                <Text style={styles.stationDistance}>
-                  Distance:{" "}
-                  {haversineDistance(
-                    selectedStation.latitude,
-                    selectedStation.longitude,
-                    userLocation.latitude,
-                    userLocation.longitude
-                  ).toFixed(2)}{" "}
-                  km
-                </Text>
-                <TouchableOpacity
-                  style={styles.directionButton}
-                  onPress={() =>
-                    Linking.openURL(
-                      `https://www.google.com/maps/dir/?api=1&destination=${selectedStation.latitude},${selectedStation.longitude}`
-                    )
-                  }
-                >
-                  <Text style={styles.directionButtonText}>Get Directions</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => SheetManager.hide("stationDetails")}
-                >
-                  <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </ActionSheet>
+          {isTraveling && (
+            <TouchableOpacity
+              onPress={() => {
+                setIsTraveling(false);
+                setRouteCoords([]);
+                setSelectedStation(null);
+              }}
+              style={styles.exitButton}
+            >
+              <Text style={styles.exitButtonText}>Exit pathing</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </TouchableWithoutFeedback>
     )
@@ -282,7 +242,7 @@ const MapComponent: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { position: "relative", flex: 1 },
   map: { width: "100%", height: "100%" },
   permissionContainer: {
     flex: 1,
@@ -307,17 +267,28 @@ const styles = StyleSheet.create({
     color: colors.WHITE,
     fontWeight: "bold",
   },
-  actionSheetContent: { padding: 20 },
-  stationTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
-  stationDistance: {},
-  directionButton: {
-    backgroundColor: colors.PRIMARY,
-    padding: 10,
+  exitButton: {
+    position: "absolute",
+    marginVertical: "auto",
+    bottom: 10, // Adjust based on placement
+    left: 10,
+    right: 10,
+    backgroundColor: "white",
+    paddingVertical: 17,
+    paddingHorizontal: 20,
     borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5, // Android shadow
   },
-  directionButtonText: { color: colors.WHITE, textAlign: "center" },
-  closeButton: { marginTop: 10, padding: 10 },
-  closeButtonText: { textAlign: "center", color: colors.BLACK },
+  exitButtonText: {
+    color: "#FF4D4D",
+    fontSize: 17,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
 });
 
 export default MapComponent;

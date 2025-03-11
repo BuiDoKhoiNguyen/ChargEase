@@ -8,6 +8,8 @@ import {
 } from "react-native";
 import { Searchbar } from "react-native-paper";
 import Color from "../../Utils/Colors";
+import { useSelector } from "react-redux";
+import { RootState } from "../../Utils/Redux/Store";
 
 interface ChargingStation {
   distance: number;
@@ -18,27 +20,39 @@ interface ChargingStation {
 }
 
 interface SearchListProps {
-  onSearch: (query: string) => void;
-  filteredStations: ChargingStation[];
   onSelectStation: (station: ChargingStation) => void;
-  onFocus: () => void;
-  onBlur: () => void;
-  isSearching: boolean;
+  setIsSearching: (isSearching: boolean) => void;
+  isSearching: boolean
 }
 
 const SearchList: React.FC<SearchListProps> = ({
-  onSearch,
-  filteredStations,
   onSelectStation,
-  onFocus,
-  onBlur,
-  isSearching,
+  setIsSearching,
+  isSearching
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const chargingStations = useSelector((state: RootState) => state.ChargingStations);
+  const [searchingResult, setSearchingResult] = useState<ChargingStation[]>(chargingStations);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // const handleSearch = (query: string) => {
+  //   setSearchQuery(query);
+  //   onSearch(query);
+  // };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    onSearch(query);
+    if (query.trim() === "") {
+      setSearchingResult(chargingStations);
+    } else {
+      const results = chargingStations
+        .filter((station) =>
+          station.title.toLowerCase().includes(query.toLowerCase())
+        )
+        .sort((a, b) => a.distance - b.distance);
+  
+      setSearchingResult(results);
+    }
+
   };
 
   return (
@@ -48,8 +62,8 @@ const SearchList: React.FC<SearchListProps> = ({
         placeholder="Search Charging Stations"
         onChangeText={handleSearch}
         value={searchQuery}
-        onFocus={onFocus}
-        onBlur={onBlur}
+        onFocus={() => setIsSearching(true)}
+        onBlur={() => setIsSearching(false)}
         style={styles.searchBar}
         inputStyle={styles.searchText}
         placeholderTextColor={Color.GRAY}
@@ -58,7 +72,7 @@ const SearchList: React.FC<SearchListProps> = ({
       {/* Search Results Dropdown */}
       {isSearching && (
         <FlatList
-          data={filteredStations}
+          data={searchingResult}
           keyExtractor={(item) => item.id.toString()}
           style={styles.resultsContainer}
           keyboardShouldPersistTaps="handled"
