@@ -6,20 +6,22 @@ import ProfileScreen from '../Screen/ProfileScreen/ProfileScreen';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '../Utils/Colors';
 import { FontAwesome } from '@expo/vector-icons';
+import { BottomTabParamList } from './types';  // Import the type
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<BottomTabParamList>(); // Apply type
+
 export default function TabNagivation() {
   return (
    <Tab.Navigator screenOptions={{
     headerShown:false,
    }}
    >
-    <Tab.Screen name='home' component={HomeScreen}
+    <Tab.Screen name='home' component={HomeScreen} initialParams={{ selectedStation: null}}
     options={{
-        tabBarLabel:'Search',
+        tabBarLabel:'Home',
         tabBarActiveTintColor:Colors.PRIMARY,
         tabBarIcon:({color,size})=>(
-            <Ionicons name="search" size={size} color={color} />
+            <Ionicons name="home" size={size} color={color} />
         )
     }}/>
     <Tab.Screen name='favourite' component={FavouriteScreen}
