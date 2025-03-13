@@ -6,6 +6,7 @@ interface ChargingStation {
   latitude: number;
   longitude: number;
   title: string;
+  isFavourite: boolean;
 }
 
 export type BottomTabParamList = {

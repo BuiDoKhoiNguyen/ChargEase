@@ -10,6 +10,7 @@ interface ChargingStation {
   title: string;
   latitude: number;
   longitude: number;
+  isFavourite: boolean;
 }
 
 interface UtilBarProps {
@@ -41,7 +42,11 @@ const UtilBar: React.FC<UtilBarProps> = ({
             style={styles.focusButton}
             onPress={focusOnUserLocation}
           >
-            <Ionicons name="locate-sharp" size={27} color={Colors.PRIMARY}></Ionicons>
+            <Ionicons
+              name="locate-sharp"
+              size={27}
+              color={Colors.PRIMARY}
+            ></Ionicons>
           </TouchableOpacity>
         )}
       </View>

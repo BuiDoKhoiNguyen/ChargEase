@@ -1,11 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import ChargingStationReducer from "./Slices/ChargingStationSlice";
-import FavouriteSlice from "./Slices/FavouriteSlice"
 
 export const store = configureStore({
   reducer: {
     ChargingStations: ChargingStationReducer,
-    FavouriteStations: FavouriteSlice,
   },
 });
 

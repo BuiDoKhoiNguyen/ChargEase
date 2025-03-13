@@ -5,6 +5,7 @@ const chargingStations = [
     longitude: 105.8542,
     title: "Hanoi Charging Station",
     distance: 0,
+    isFavourite: true,
   },
   {
     id: 2,
@@ -12,6 +13,7 @@ const chargingStations = [
     longitude: 105.836,
     title: "Tay Ho Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 3,
@@ -19,6 +21,7 @@ const chargingStations = [
     longitude: 105.8422,
     title: "Cau Giay Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 4,
@@ -26,6 +29,7 @@ const chargingStations = [
     longitude: 105.8113,
     title: "Ha Dong Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 5,
@@ -33,6 +37,7 @@ const chargingStations = [
     longitude: 105.7934,
     title: "Thanh Xuan Charging Station",
     distance: 0,
+    isFavourite: false,
   },
 
   {
@@ -41,6 +46,7 @@ const chargingStations = [
     longitude: 106.7009,
     title: "Ho Chi Minh City Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 7,
@@ -48,6 +54,7 @@ const chargingStations = [
     longitude: 106.6825,
     title: "District 7 Charging Station",
     distance: 0,
+    isFavourite: true,
   },
   {
     id: 8,
@@ -55,6 +62,7 @@ const chargingStations = [
     longitude: 106.7146,
     title: "Thu Duc Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 9,
@@ -62,6 +70,7 @@ const chargingStations = [
     longitude: 106.678,
     title: "Binh Thanh Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 10,
@@ -69,6 +78,7 @@ const chargingStations = [
     longitude: 106.7043,
     title: "Phu Nhuan Charging Station",
     distance: 0,
+    isFavourite: false,
   },
 
   {
@@ -77,6 +87,7 @@ const chargingStations = [
     longitude: 108.2062,
     title: "Da Nang Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 12,
@@ -84,6 +95,7 @@ const chargingStations = [
     longitude: 108.2255,
     title: "Son Tra Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 13,
@@ -91,6 +103,7 @@ const chargingStations = [
     longitude: 108.237,
     title: "Ngu Hanh Son Charging Station",
     distance: 0,
+    isFavourite: false,
   },
 
   {
@@ -99,6 +112,7 @@ const chargingStations = [
     longitude: 109.1966,
     title: "Nha Trang Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 15,
@@ -106,6 +120,7 @@ const chargingStations = [
     longitude: 108.4424,
     title: "Da Lat Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 16,
@@ -113,6 +128,7 @@ const chargingStations = [
     longitude: 103.984,
     title: "Phu Quoc Charging Station",
     distance: 0,
+    isFavourite: false,
   },
 
   {
@@ -121,6 +137,7 @@ const chargingStations = [
     longitude: 106.6881,
     title: "Hai Phong Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 18,
@@ -128,6 +145,7 @@ const chargingStations = [
     longitude: 105.7293,
     title: "Can Tho Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 19,
@@ -135,6 +153,7 @@ const chargingStations = [
     longitude: 105.6811,
     title: "Vinh Charging Station",
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 20,
@@ -142,6 +161,7 @@ const chargingStations = [
     longitude: 109.2198,
     title: "Quy Nhon Charging Station",
     distance: 0,
+    isFavourite: false,
   },
 
   {
@@ -150,6 +170,7 @@ const chargingStations = [
     latitude: 21.0285,
     longitude: 105.8542,
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 22,
@@ -157,6 +178,7 @@ const chargingStations = [
     latitude: 21.0355,
     longitude: 105.823,
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 23,
@@ -164,6 +186,7 @@ const chargingStations = [
     latitude: 21.0369,
     longitude: 105.7906,
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 24,
@@ -171,6 +194,7 @@ const chargingStations = [
     latitude: 21.0186,
     longitude: 105.8313,
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 25,
@@ -178,6 +202,7 @@ const chargingStations = [
     latitude: 21.0075,
     longitude: 105.856,
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 26,
@@ -185,6 +210,7 @@ const chargingStations = [
     latitude: 20.993,
     longitude: 105.811,
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 27,
@@ -192,6 +218,7 @@ const chargingStations = [
     latitude: 21.0582,
     longitude: 105.8251,
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 28,
@@ -199,6 +226,7 @@ const chargingStations = [
     latitude: 21.0481,
     longitude: 105.875,
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 29,
@@ -206,6 +234,7 @@ const chargingStations = [
     latitude: 20.9745,
     longitude: 105.85,
     distance: 0,
+    isFavourite: false,
   },
   {
     id: 30,
@@ -213,6 +242,7 @@ const chargingStations = [
     latitude: 21.0337,
     longitude: 105.9005,
     distance: 0,
+    isFavourite: false,
   },
 ];
 

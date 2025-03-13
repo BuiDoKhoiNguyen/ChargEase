@@ -27,6 +27,7 @@ interface ChargingStation {
   latitude: number;
   longitude: number;
   title: string;
+  isFavourite: boolean;
 }
 
 const OPENROUTESERVICE_API_KEY =
@@ -37,49 +38,49 @@ const MapComponent: React.FC = () => {
   const [selectedStation, setSelectedStation] =
     useState<ChargingStation | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
-  const mapRef = useRef<MapView | null>(null);
   const [routeCoords, setRouteCoords] = useState<
     { latitude: number; longitude: number }[]
   >([]);
   const [isTraveling, setIsTraveling] = useState(false);
+  const mapRef = useRef<MapView | null>(null);
+  const locationSubscription = useRef<Location.LocationSubscription | null>(
+    null
+  );
 
-  const route = useRoute<HomeScreenProps['route']>();
+  const route = useRoute<HomeScreenProps["route"]>();
   const favouriteSelectedStation = route.params?.selectedStation;
-  
+
   useEffect(() => {
-    console.log("using effect")
     if (favouriteSelectedStation) {
-      console.log(favouriteSelectedStation)
-      fetchDirections(favouriteSelectedStation)
+      fetchDirections(favouriteSelectedStation);
     }
   }, [favouriteSelectedStation]);
 
   useEffect(() => {
-    let isMounted = true; // Prevents state updates on unmounted components
+    let isMounted = true;
 
     const fetchLocation = async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          if (isMounted) setPermissionDenied(true);
-          return;
-        }
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        if (isMounted) setPermissionDenied(true);
+        return;
+      }
 
-        setPermissionDenied(false);
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
+      setPermissionDenied(false);
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      if (isMounted) {
+        setUserLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
         });
 
-        if (isMounted) {
-          setUserLocation({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching location:", error);
+        startTracking();
       }
     };
 
@@ -99,29 +100,44 @@ const MapComponent: React.FC = () => {
     return () => {
       isMounted = false;
       appStateListener.remove();
+      stopTracking();
     };
   }, []);
 
-  setInterval(async () => {
-    const location = await Location.getCurrentPositionAsync();
-
-    setUserLocation((prevLocation) => {
-      if (
-        !prevLocation ||
-        prevLocation.latitude !== location.coords.latitude ||
-        prevLocation.longitude !== location.coords.longitude
-      ) {
-        return {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        };
+  const startTracking = async () => {
+    stopTracking(); // Ensure no duplicate tracking
+    locationSubscription.current = await Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.High,
+        timeInterval: 5000, // Update every 5 seconds
+        distanceInterval: 10, // Update every 10 meters
+      },
+      (location) => {
+        setUserLocation((prevLocation) => {
+          if (
+            !prevLocation ||
+            prevLocation.latitude !== location.coords.latitude ||
+            prevLocation.longitude !== location.coords.longitude
+          ) {
+            return {
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            };
+          }
+          return prevLocation;
+        });
       }
-      return prevLocation;
-    });
+    );
+  };
 
-  }, 15000);
+  const stopTracking = () => {
+    if (locationSubscription.current) {
+      locationSubscription.current.remove();
+      locationSubscription.current = null;
+    }
+  };
 
   const focusOnUserLocation = () => {
     if (userLocation && mapRef.current) {
@@ -192,6 +208,7 @@ const MapComponent: React.FC = () => {
             ref={mapRef}
             style={styles.map}
             showsUserLocation
+            followsUserLocation
             initialRegion={userLocation}
           >
             {chargingStations.map((station) => (
@@ -210,7 +227,7 @@ const MapComponent: React.FC = () => {
               <Polyline
                 coordinates={routeCoords}
                 strokeWidth={10}
-                strokeColor= {Colors.PRIMARY}
+                strokeColor={Colors.PRIMARY}
               />
             )}
           </MapView>
@@ -242,7 +259,7 @@ const MapComponent: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { position: "relative", flex: 1 },
+  container: { flex: 1 },
   map: { width: "100%", height: "100%" },
   permissionContainer: {
     flex: 1,

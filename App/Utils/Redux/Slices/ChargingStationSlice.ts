@@ -7,6 +7,7 @@ interface ChargingStation {
     latitude: number;
     longitude: number;
     title: string;
+    isFavourite: boolean;
   }  
 
 const initialState: ChargingStation[] = chargingStations;

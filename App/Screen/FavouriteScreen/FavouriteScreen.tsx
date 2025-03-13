@@ -25,6 +25,7 @@ interface ChargingStation {
   latitude: number;
   longitude: number;
   title: string;
+  isFavourite: boolean;
 }
 type NavigationProps = NativeStackNavigationProp<
   BottomTabParamList,
@@ -33,8 +34,9 @@ type NavigationProps = NativeStackNavigationProp<
 
 export default function FavouriteScreen() {
   const favouriteStations = useSelector(
-    (state: RootState) => state.FavouriteStations
-  );
+    (state: RootState) => state.ChargingStations
+  ).filter(element => element.isFavourite === true);
+  
   const [searchingResult, setSearchingResult] =
     useState<ChargingStation[]>(favouriteStations);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -67,7 +69,7 @@ export default function FavouriteScreen() {
   const onSelectStation = (station: ChargingStation) => {
     setSelectedStation(station);
     SheetManager.show("stationDetails");
-  }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -93,10 +95,7 @@ export default function FavouriteScreen() {
         data={searchingResult}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <FavouriteStation
-            station={item}
-            onSelectStation={onSelectStation}
-          />
+          <FavouriteStation station={item} onSelectStation={onSelectStation} />
         )}
       ></FlatList>
       <InformationSheet

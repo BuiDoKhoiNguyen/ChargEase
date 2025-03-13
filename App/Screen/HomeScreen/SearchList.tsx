@@ -17,21 +17,25 @@ interface ChargingStation {
   title: string;
   latitude: number;
   longitude: number;
+  isFavourite: boolean;
 }
 
 interface SearchListProps {
   onSelectStation: (station: ChargingStation) => void;
   setIsSearching: (isSearching: boolean) => void;
-  isSearching: boolean
+  isSearching: boolean;
 }
 
 const SearchList: React.FC<SearchListProps> = ({
   onSelectStation,
   setIsSearching,
-  isSearching
+  isSearching,
 }) => {
-  const chargingStations = useSelector((state: RootState) => state.ChargingStations);
-  const [searchingResult, setSearchingResult] = useState<ChargingStation[]>(chargingStations);
+  const chargingStations = useSelector(
+    (state: RootState) => state.ChargingStations
+  );
+  const [searchingResult, setSearchingResult] =
+    useState<ChargingStation[]>(chargingStations);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // const handleSearch = (query: string) => {
@@ -49,10 +53,9 @@ const SearchList: React.FC<SearchListProps> = ({
           station.title.toLowerCase().includes(query.toLowerCase())
         )
         .sort((a, b) => a.distance - b.distance);
-  
+
       setSearchingResult(results);
     }
-
   };
 
   return (

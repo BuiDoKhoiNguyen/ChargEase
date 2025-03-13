@@ -9,6 +9,7 @@ interface ChargingStation {
   latitude: number;
   longitude: number;
   title: string;
+  isFavourite: boolean;
 }
 
 interface FavouriteStationProps {
@@ -16,12 +17,14 @@ interface FavouriteStationProps {
   onSelectStation: (station: ChargingStation) => void;
 }
 
-const FavouriteStation: React.FC<FavouriteStationProps> = ({ station, onSelectStation }) => {
-
+const FavouriteStation: React.FC<FavouriteStationProps> = ({
+  station,
+  onSelectStation,
+}) => {
   return (
     <TouchableOpacity
-    style={styles.stationCard}
-    onPress={() => onSelectStation(station)}
+      style={styles.stationCard}
+      onPress={() => onSelectStation(station)}
     >
       <View style={styles.infoContainer}>
         <Text style={styles.stationTitle}>{station.title}</Text>
