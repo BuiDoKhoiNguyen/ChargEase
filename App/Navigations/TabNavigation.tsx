@@ -1,8 +1,8 @@
 import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import HomeScreen from '../Screen/HomeScreen/HomeScreen';
-import FavouriteScreen from '../Screen/FavouriteScreen/FavouriteScreen';
-import ProfileScreen from '../Screen/ProfileScreen/ProfileScreen';
+import HomeScreen from '../Screens/HomeScreen/HomeScreen';
+import FavouriteScreen from '../Screens/FavouriteScreen/FavouriteScreen';
+import ProfileScreen from '../Screens/ProfileScreen/ProfileScreen';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '../Utils/Colors';
 import { FontAwesome } from '@expo/vector-icons';

@@ -1,22 +1,26 @@
 import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-expo';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import React, { useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import TabNagivation from './App/Navigations/TabNavigation';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import { tokenCache } from './App/Utils/Cache';
-import {Provider} from "react-redux";
-import LoginScreen from './App/Screen/LoginScreen/LoginScreen';
+import { View } from 'react-native';
+import { Provider } from "react-redux";
 import store from './App/Utils/Redux/Store';
+import AuthNavigation from './App/Navigations/AuthNavigation';
+import TabNagivation from './App/Navigations/TabNavigation';
+import SplashScreenComponent from './App/Screens/SplashScreen/SplashScreen';
+import { tokenCache } from './App/Utils/Cache';
+
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  const publishableKey = 'pk_test_cHVtcGVkLXR1bmEtMi5jbGVyay5hY2NvdW50cy5kZXYk'
+  // const publishableKey = 'pk_test_YXJ0aXN0aWMtbmFyd2hhbC03NS5jbGVyay5hY2NvdW50cy5kZXYk'
 
-  if (!publishableKey) {
-    throw new Error('Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file')
-  }
+  const publishableKey = 'pk_test_cGVhY2VmdWwtZGlub3NhdXItMjguY2xlcmsuYWNjb3VudHMuZGV2JA';
+
+  const [appReady, setAppReady] = useState(false);
+  const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
 
   const [fontsLoaded, fontError] = useFonts({
     'Outfit-Bold': require('./assets/fonts/Outfit-Bold.ttf'),
@@ -24,38 +28,45 @@ export default function App() {
     'Outfit-SemiBold': require('./assets/fonts/Outfit-SemiBold.ttf'),
   });
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded || fontError) {
-      await SplashScreen.hideAsync();
-    }
+  useEffect(() => {
+    const prepareApp = async () => {
+      try {
+        if (!fontsLoaded && !fontError) return;
+
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        setAppReady(true);
+      } catch (e) {
+        console.warn(e);
+      }
+    };
+
+    prepareApp();
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) {
-    return null;
+  const onLayoutRootView = useCallback(async () => {
+    if (appReady) {
+      await SplashScreen.hideAsync();
+    }
+  }, [appReady]);
+
+  if (!appReady) {
+    return <SplashScreenComponent />;
   }
 
   return (
     <Provider store={store}>
-    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey} >
-      <View style={styles.container} onLayout={onLayoutRootView}>
-        <SignedIn>
-          <NavigationContainer>
+      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+        <NavigationContainer onReady={onLayoutRootView}>
+          <SignedIn>
             <TabNagivation />
-          </NavigationContainer>
-        </SignedIn>
-        <SignedOut>
-          <LoginScreen />
-        </SignedOut>
+          </SignedIn>
+          <SignedOut>
+            <AuthNavigation />
+          </SignedOut>
+        </NavigationContainer>
         <StatusBar style="auto" />
-      </View>
-    </ClerkProvider>
+      </ClerkProvider>
     </Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-});
